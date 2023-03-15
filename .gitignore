@@ -8,6 +8,7 @@
 *.dll
 *.so
 *.dylib
+totem
 
 # Test binary, built with `go test -c`
 *.test
@@ -39,6 +40,8 @@ go.work
 # Ignore all local history of files
 .history
 .ionide
+
+### Ignore env files
 .env
 .local.env
 .prod.env
