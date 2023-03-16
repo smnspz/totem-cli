@@ -43,6 +43,6 @@ go.work
 
 ### Ignore env files
 .env
-.local.env
-.prod.env
-.test.env
+local.env
+prod.env
+test.env
