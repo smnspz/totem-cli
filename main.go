@@ -48,7 +48,8 @@ func main() {
 		case List:
 			list()
 		case Auth:
-			auth.GetToken(os.Getenv("USERNAME"), os.Getenv("PASSWORD"), os.Getenv("BASE_URL"))
+			token := auth.GetToken(os.Getenv("BASE_URL"))
+			fmt.Println(token)
 		case Help:
 			help()
 		case "":
