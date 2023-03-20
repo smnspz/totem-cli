@@ -67,6 +67,5 @@ func GetToken(baseUrl string) string {
 		log.Fatalln(ioErr)
 	}
 
-	// log.Println(string(body))
 	return string(body)
 }
