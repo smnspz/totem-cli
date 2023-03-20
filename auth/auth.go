@@ -39,7 +39,7 @@ func getUsername() string {
 	return strings.Trim(username, "\n")
 }
 
-func GetToken(baseUrl string) string {
+func GetToken(baseUrl *string) *string {
 	// https://medium.com/@masnun/making-http-requests-in-golang-dd123379efe7
 	username := getUsername()
 	password := getPassword()
@@ -53,7 +53,7 @@ func GetToken(baseUrl string) string {
 		log.Fatalln(err)
 	}
 
-	url := baseUrl + "/jwt/login"
+	url := *baseUrl + "/jwt/login"
 
 	resp, httpErr := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if httpErr != nil {
@@ -67,5 +67,11 @@ func GetToken(baseUrl string) string {
 		log.Fatalln(ioErr)
 	}
 
-	return string(body)
+	var retVal map[string]interface{}
+
+	if err := json.Unmarshal(body, &retVal); err != nil {
+		panic(err)
+	}
+
+	return retVal["token"].(*string)
 }

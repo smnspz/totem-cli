@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -37,8 +36,10 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading env file")
+		panic(err)
 	}
+
+	url := os.Getenv("BASE_URL")
 
 	for _, arg := range args {
 
@@ -48,8 +49,8 @@ func main() {
 		case List:
 			list()
 		case Auth:
-			token := auth.GetToken(os.Getenv("BASE_URL"))
-			fmt.Println(token)
+			token := auth.GetToken(&url)
+			fmt.Println(*token)
 		case Help:
 			help()
 		case "":
