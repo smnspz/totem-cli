@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -39,39 +38,40 @@ func getUsername() string {
 	return strings.Trim(username, "\n")
 }
 
-func GetToken(baseUrl *string) *string {
+func GetToken(baseUrl *string, username *string, password *string) string {
 	// https://medium.com/@masnun/making-http-requests-in-golang-dd123379efe7
-	username := getUsername()
-	password := getPassword()
-
 	body, err := json.Marshal(map[string]string{
-		"username": username,
-		"password": password,
+		"username": *username,
+		"password": *password,
 	})
 
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("Error while parsing user json")
+		panic(err)
 	}
 
 	url := *baseUrl + "/jwt/login"
 
-	resp, httpErr := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if httpErr != nil {
-		log.Fatalln(httpErr)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println("Error while sending request")
+		panic(err)
 	}
 
 	defer resp.Body.Close()
 
 	body, ioErr := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(ioErr)
+		fmt.Println("Error while reading response")
+		panic(ioErr)
 	}
 
 	var retVal map[string]interface{}
 
 	if err := json.Unmarshal(body, &retVal); err != nil {
+		fmt.Println("Error while parsing response json")
 		panic(err)
 	}
 
-	return retVal["token"].(*string)
+	return retVal["token"].(string)
 }

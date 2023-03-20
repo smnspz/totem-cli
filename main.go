@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/pelletier/go-toml"
 	"github.com/smnspz/totem-cli/auth"
 )
 
@@ -14,6 +18,45 @@ const (
 	Help string = "help"
 	Auth string = "auth"
 )
+
+type User struct {
+	email    string
+	password string
+}
+
+const totemConfigVar string = "TOTEM_CONFIG"
+const totemConfig string = ".totemconfig"
+
+func parseConfigs(configFile string) *User {
+	var email, password string
+	body, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Fatalf("Unable to read config file: %v", err)
+	}
+	config, err := toml.Load(string(body))
+	if err != nil {
+		log.Fatalf("Unable to parse config file: %v", err)
+	}
+	email = config.Get("user.email").(string)
+	password = config.Get("user.password").(string)
+	return &User{email, password}
+}
+
+func setTotemConfigs(pathToConfig string) {
+	configFile := os.Getenv(totemConfigVar)
+	if configFile == "" {
+		homeDir := os.Getenv("HOME")
+		os.Setenv(totemConfigVar, strings.Join(
+			[]string{homeDir, pathToConfig, totemConfig}, "/"),
+		)
+	}
+}
+
+func getUserFromConfigs(pathToConfig string) *User {
+	setTotemConfigs(pathToConfig)
+	user := parseConfigs(os.Getenv(totemConfigVar))
+	return &User{user.email, user.password}
+}
 
 func add() {
 	fmt.Println("Adding a new entry")
@@ -41,6 +84,8 @@ func main() {
 
 	url := os.Getenv("BASE_URL")
 
+	var token string
+
 	for _, arg := range args {
 
 		switch arg {
@@ -49,8 +94,9 @@ func main() {
 		case List:
 			list()
 		case Auth:
-			token := auth.GetToken(&url)
-			fmt.Println(*token)
+			user := getUserFromConfigs("")
+			token = auth.GetToken(&url, &user.email, &user.password)
+			fmt.Println(token)
 		case Help:
 			help()
 		case "":
