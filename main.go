@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -29,7 +28,7 @@ const totemConfig string = ".totemconfig"
 
 func parseConfigs(configFile string) *User {
 	var email, password string
-	body, err := ioutil.ReadFile(configFile)
+	body, err := os.ReadFile(configFile)
 	if err != nil {
 		log.Fatalf("Unable to read config file: %v", err)
 	}
